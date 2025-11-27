@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robotics Control Platform v4.0.0</title>
+    <style>
+        /* Design System Variables */
+        :root {
+            --color-white: rgba(255, 255, 255, 1);
+            --color-black: rgba(0, 0, 0, 1);
+            --color-cream-50: rgba(252, 252, 249, 1);
+            --color-cream-100: rgba(255, 255, 253, 1);
+            --color-gray-200: rgba(245, 245, 245, 1);
+            --color-gray-300: rgba(167, 169, 169, 1);
+            --color-gray-400: rgba(119, 124, 124, 1);
+            --color-slate-500: rgba(98, 108, 113, 1);
+            --color-brown-600: rgba(94, 82, 64, 1);
+            --color-charcoal-700: rgba(31, 33, 33, 1);
+            --color-charcoal-800: rgba(38, 40, 40, 1);
+            --color-slate-900: rgba(19, 52, 59, 1);
+            --color-teal-300: rgba(50, 184, 198, 1);
+            --color-teal-400: rgba(45, 166, 178, 1);
+            --color-teal-500: rgba(33, 128, 141, 1);
+            --color-teal-600: rgba(29, 116, 128, 1);
+            --color-teal-700: rgba(26, 104, 115, 1);
+            --color-red-400: rgba(255, 84, 89, 1);
+            --color-red-500: rgba(192, 21, 47, 1);
+            --color-orange-400: rgba(230, 129, 97, 1);
+            --color-orange-500: rgba(168, 75, 47, 1);
+            --color-green-500: rgba(0, 170, 0, 1);
+
+            --color-brown-600-rgb: 94, 82, 64;
+            --color-teal-500-rgb: 33, 128, 141;
+            --color-slate-900-rgb: 19, 52, 59;
+            --color-slate-500-rgb: 98, 108, 113;
+
+            --color-bg-1: rgba(59, 130, 246, 0.08);
+            --color-bg-2: rgba(245, 158, 11, 0.08);
+            --color-bg-3: rgba(34, 197, 94, 0.08);
+            --color-bg-4: rgba(239, 68, 68, 0.08);
+
+            --color-background: var(--color-cream-50);
+            --color-surface: var(--color-cream-100);
+            --color-text: var(--color-slate-900);
+            --color-text-secondary: var(--color-slate-500);
+            --color-primary: var(--color-teal-500);
+            --color-primary-hover: var(--color-teal-600);
+            --color-border: rgba(var(--color-brown-600-rgb), 0.2);
+            --color-card-border: rgba(var(--color-brown-600-rgb), 0.12);
+            --color-success: var(--color-green-500);
+            --color-error: var(--color-red-500);
+            --color-warning: var(--color-orange-500);
+
+            --font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.06);
+            --radius-base: 8px;
+            --space-8: 8px;
+            --space-12: 12px;
+            --space-16: 16px;
+            --space-24: 24px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color-background: var(--color-charcoal-700);
+                --color-surface: var(--color-charcoal-800);
+                --color-text: var(--color-gray-200);
+                --color-text-secondary: var(--color-gray-400);
+                --color-primary: var(--color-teal-300);
+                --color-border: rgba(119, 124, 124, 0.3);
+                --color-card-border: rgba(119, 124, 124, 0.2);
+                --color-bg-1: rgba(29, 78, 216, 0.15);
+                --color-bg-2: rgba(180, 83, 9, 0.15);
+                --color-bg-3: rgba(21, 128, 61, 0.15);
+                --color-bg-4: rgba(185, 28, 28, 0.15);
+            }
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: var(--font-family-base);
+            background: var(--color-background);
+            color: var(--color-text);
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        /* Top Navigation Bar */
+        .top-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: var(--color-surface);
+            border-bottom: 1px solid var(--color-card-border);
+            display: flex;
+            align-items: center;
+            padding: 0 var(--space-24);
+            gap: var(--space-24);
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: var(--space-16);
+        }
+
+        .app-selector {
+            display: flex;
+            align-items: center;
+            gap: var(--space-8);
+            padding: var(--space-8) var(--space-12);
+            background: var(--color-bg-1);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-base);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .env-badge {
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .env-badge.prod { background: #d4edda; color: #155724; }
+        .env-badge.staging { background: #fff3cd; color: #856404; }
+        .env-badge.dev { background: #f8d7da; color: #721c24; }
+
+        .nav-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: var(--space-16);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: var(--space-8);
+            font-size: 14px;
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-base);
+            border: 1px solid var(--color-border);
+            background: var(--color-surface);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            position: relative;
+        }
+
+        .btn-icon:hover {
+            background: var(--color-bg-1);
+        }
+
+        .badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: var(--color-error);
+            color: white;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Code Console Toggle */
+        .code-console-toggle {
+            position: fixed;
+            top: 80px;
+            right: 0;
+            background: var(--color-primary);
+            color: white;
+            padding: var(--space-12) var(--space-16);
+            border-top-left-radius: var(--radius-base);
+            border-bottom-left-radius: var(--radius-base);
+            cursor: pointer;
+            z-index: 99;
+            font-size: 13px;
+            font-weight: 500;
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Sliding Code Console */
+        .code-console {
+            position: fixed;
+            top: 64px;
+            right: -40%;
+            width: 40%;
+            height: calc(100vh - 64px);
+            background: var(--color-charcoal-800);
+            border-left: 1px solid var(--color-border);
+            z-index: 98;
+            transition: right 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .code-console.open {
+            right: 0;
+        }
+
+        .console-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--color-border);
+            background: var(--color-charcoal-700);
+        }
+
+        .console-tab {
+            padding: var(--space-12) var(--space-24);
+            cursor: pointer;
+            color: var(--color-gray-400);
+            font-size: 13px;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+        }
+
+        .console-tab.active {
+            color: var(--color-teal-300);
+            border-bottom-color: var(--color-teal-300);
+        }
+
+        .console-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--space-16);
+            font-family: var(--font-family-mono);
+            font-size: 12px;
+            color: var(--color-gray-200);
+        }
+
+        .console-actions {
+            padding: var(--space-12);
+            border-top: 1px solid var(--color-border);
+            display: flex;
+            gap: var(--space-8);
+        }
+
+        .log-line {
+            margin-bottom: 4px;
+            display: flex;
+            gap: var(--space-8);
+        }
+
+        .log-time { color: var(--color-gray-400); }
+        .log-level-info { color: var(--color-teal-300); }
+        .log-level-warning { color: var(--color-orange-400); }
+        .log-level-error { color: var(--color-red-400); }
+
+        /* Main Content */
+        .main-container {
+            margin-top: 64px;
+            padding: var(--space-24);
+            transition: margin-right 0.3s ease;
+        }
+
+        .main-container.console-open {
+            margin-right: 40%;
+        }
+
+        /* Dashboard Tabs */
+        .dashboard-tabs {
+            display: flex;
+            gap: var(--space-8);
+            margin-bottom: var(--space-24);
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: var(--space-12) var(--space-24);
+            border: 1px solid var(--color-border);
+            background: var(--color-surface);
+            border-radius: var(--radius-base);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--color-primary);
+            color: white;
+            border-color: var(--color-primary);
+        }
+
+        .tab-btn:hover:not(.active) {
+            background: var(--color-bg-1);
+        }
+
+        /* Dashboard Content */
+        .dashboard-view {
+            display: none;
+        }
+
+        .dashboard-view.active {
+            display: block;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-card-border);
+            border-radius: var(--radius-base);
+            padding: var(--space-24);
+            margin-bottom: var(--space-24);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-16);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--space-16);
+            margin-bottom: var(--space-24);
+        }
+
+        .metric-card {
+            background: var(--color-bg-1);
+            border: 1px solid var(--color-card-border);
+            border-radius: var(--radius-base);
+            padding: var(--space-16);
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-8);
+        }
+
+        .metric-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--color-text);
+        }
+
+        .metric-trend {
+            font-size: 12px;
+            margin-top: var(--space-8);
+        }
+
+        .trend-up { color: var(--color-success); }
+        .trend-down { color: var(--color-error); }
+
+        /* Robot Grid */
+        .robot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-16);
+        }
+
+        .robot-card {
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-base);
+            padding: var(--space-16);
+            background: var(--color-surface);
+        }
+
+        .robot-card.active { border-color: var(--color-success); background: var(--color-bg-3); }
+        .robot-card.idle { border-color: var(--color-text-secondary); background: var(--color-bg-1); }
+        .robot-card.error { border-color: var(--color-error); background: var(--color-bg-4); }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-badge.success { background: var(--color-bg-3); color: var(--color-success); }
+        .status-badge.error { background: var(--color-bg-4); color: var(--color-error); }
+        .status-badge.warning { background: var(--color-bg-2); color: var(--color-warning); }
+        .status-badge.info { background: var(--color-bg-1); color: var(--color-primary); }
+
+        /* Buttons */
+        .btn {
+            padding: var(--space-12) var(--space-24);
+            border-radius: var(--radius-base);
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--color-primary-hover);
+        }
+
+        .btn-secondary {
+            background: var(--color-bg-1);
+            color: var(--color-text);
+            border: 1px solid var(--color-border);
+        }
+
+        .btn-success {
+            background: var(--color-success);
+            color: white;
+        }
+
+        .btn-error {
+            background: var(--color-error);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: var(--space-8) var(--space-12);
+            font-size: 12px;
+        }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: var(--space-12);
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .data-table th {
+            background: var(--color-bg-1);
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--color-text-secondary);
+        }
+
+        .data-table tr:hover {
+            background: var(--color-bg-1);
+        }
+
+        /* Thread Comments */
+        .comment-section {
+            margin-top: var(--space-16);
+            padding-top: var(--space-16);
+            border-top: 1px solid var(--color-border);
+        }
+
+        .comment-item {
+            display: flex;
+            gap: var(--space-12);
+            margin-bottom: var(--space-12);
+            padding: var(--space-12);
+            background: var(--color-bg-1);
+            border-radius: var(--radius-base);
+        }
+
+        .comment-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--color-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+        }
+
+        .comment-content {
+            flex: 1;
+        }
+
+        .comment-author {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .comment-text {
+            font-size: 13px;
+            color: var(--color-text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .comment-time {
+            font-size: 11px;
+            color: var(--color-text-secondary);
+        }
+
+        .comment-reply {
+            margin-left: 44px;
+            border-left: 2px solid var(--color-border);
+            padding-left: var(--space-12);
+        }
+
+        .add-comment {
+            display: flex;
+            gap: var(--space-8);
+            margin-top: var(--space-12);
+        }
+
+        .add-comment input {
+            flex: 1;
+            padding: var(--space-8) var(--space-12);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-base);
+            background: var(--color-surface);
+            color: var(--color-text);
+        }
+
+        /* Security Advisories */
+        .advisory-banner {
+            padding: var(--space-16);
+            border-radius: var(--radius-base);
+            margin-bottom: var(--space-16);
+            display: flex;
+            align-items: center;
+            gap: var(--space-12);
+        }
+
+        .advisory-banner.critical {
+            background: var(--color-bg-4);
+            border: 1px solid var(--color-error);
+        }
+
+        .advisory-banner.warning {
+            background: var(--color-bg-2);
+            border: 1px solid var(--color-warning);
+        }
+
+        .advisory-banner.info {
+            background: var(--color-bg-1);
+            border: 1px solid var(--color-primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .code-console {
+                width: 100%;
+                right: -100%;
+            }
+            .main-container.console-open {
+                margin-right: 0;
+            }
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="nav-left">
+            <div class="app-selector">
+                <span style="font-size: 20px;">🤖</span>
+                <select style="border: none; background: transparent; font-weight: 500; cursor: pointer;" id="app-selector">
+                    <option value="consolidator">Consolidator</option>
+                    <option value="palletizer">Palletizer</option>
+                    <option value="depalletizer">Depalletizer</option>
+                    <option value="system">System Admin</option>
+                </select>
+            </div>
+            <div class="env-badge prod" id="env-badge">PROD</div>
+        </div>
+        <div class="nav-right">
+            <div style="font-size: 12px; color: var(--color-text-secondary);">
+                <span style="color: var(--color-success);">●</span> VPN Connected
+            </div>
+            <button class="btn-icon" title="Alerts">
+                🔔
+                <span class="badge">3</span>
+            </button>
+            <button class="btn-icon" title="Settings">⚙️</button>
+            <button class="btn-icon" title="Help">?</button>
+            <div class="user-info">
+                <span>👤</span>
+                <div style="font-size: 13px;">
+                    <div style="font-weight: 600;">Иван Петров</div>
+                    <div style="color: var(--color-text-secondary); font-size: 11px;">Manager</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Code Console Toggle -->
+    <div class="code-console-toggle" id="console-toggle">
+        &lt;/&gt; Code Console
+    </div>
+
+    <!-- Sliding Code Console -->
+    <div class="code-console" id="code-console">
+        <div class="console-tabs">
+            <div class="console-tab active" data-tab="logs">Logs</div>
+            <div class="console-tab" data-tab="api">API</div>
+            <div class="console-tab" data-tab="webhooks">Webhooks</div>
+            <div class="console-tab" data-tab="debug">Debug</div>
+        </div>
+        <div class="console-content" id="console-content">
+            <div class="log-line">
+                <span class="log-time">[14:35:22]</span>
+                <span class="log-level-info">[INFO]</span>
+                <span>System initialized successfully</span>
+            </div>
+            <div class="log-line">
+                <span class="log-time">[14:35:23]</span>
+                <span class="log-level-info">[INFO]</span>
+                <span>Camera feed connected - Robot 1</span>
+            </div>
+            <div class="log-line">
+                <span class="log-time">[14:35:24]</span>
+                <span class="log-level-warning">[WARN]</span>
+                <span>High temperature detected - Robot 3: 58°C</span>
+            </div>
+            <div class="log-line">
+                <span class="log-time">[14:35:25]</span>
+                <span class="log-level-error">[ERROR]</span>
+                <span>Calibration failed - Robot 3</span>
+            </div>
+            <div class="log-line">
+                <span class="log-time">[14:35:26]</span>
+                <span class="log-level-info">[INFO]</span>
+                <span>Task completed - 42 items processed</span>
+            </div>
+        </div>
+        <div class="console-actions">
+            <button class="btn btn-secondary btn-sm">🔍 Filter</button>
+            <button class="btn btn-secondary btn-sm">💾 Export</button>
+            <button class="btn btn-secondary btn-sm">🗑️ Clear</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-container" id="main-container">
+        <!-- Security Advisories -->
+        <div class="advisory-banner critical">
+            <span style="font-size: 24px;">🚨</span>
+            <div style="flex: 1;">
+                <div style="font-weight: 600; margin-bottom: 4px;">Unusual access pattern detected</div>
+                <div style="font-size: 12px; color: var(--color-text-secondary);">Review audit log immediately</div>
+            </div>
+            <button class="btn btn-error btn-sm">Review</button>
+        </div>
+
+        <!-- Dashboard Tabs -->
+        <div class="dashboard-tabs">
+            <button class="tab-btn" data-view="operator">👤 Operator</button>
+            <button class="tab-btn active" data-view="manager">📊 Manager</button>
+            <button class="tab-btn" data-view="developer">👨💻 Developer</button>
+            <button class="tab-btn" data-view="business">🎬 Business</button>
+            <button class="tab-btn" data-view="admin">🔧 Admin</button>
+        </div>
+
+        <!-- OPERATOR DASHBOARD -->
+        <div class="dashboard-view" id="operator-view">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">🤖 Robot Fleet Status</h2>
+                    <span class="status-badge info">1/3 Active</span>
+                </div>
+                <div class="robot-grid">
+                    <div class="robot-card active">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 16px;">🤖 Robot 1</div>
+                                <div style="font-size: 12px; color: var(--color-text-secondary);">UR20-001 • Lobach</div>
+                            </div>
+                            <span class="status-badge success">ACTIVE</span>
+                        </div>
+                        <div style="margin-bottom: 12px;">Endless sorting • 867 items</div>
+                        <div style="display: flex; gap: 8px; margin-top: 12px;">
+                            <button class="btn btn-secondary btn-sm">⏸ Pause</button>
+                            <button class="btn btn-secondary btn-sm">🔄 Restart</button>
+                        </div>
+                    </div>
+                    <div class="robot-card idle">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 16px;">🤖 Robot 2</div>
+                                <div style="font-size: 12px; color: var(--color-text-secondary);">UR20-002 • SEMAT</div>
+                            </div>
+                            <span class="status-badge info">IDLE</span>
+                        </div>
+                        <div style="margin-bottom: 12px;">Standby mode</div>
+                        <div style="display: flex; gap: 8px; margin-top: 12px;">
+                            <button class="btn btn-success btn-sm">▶ Start</button>
+                        </div>
+                    </div>
+                    <div class="robot-card error">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 16px;">🤖 Robot 3</div>
+                                <div style="font-size: 12px; color: var(--color-text-secondary);">UR20-003 • Belgrade</div>
+                            </div>
+                            <span class="status-badge error">ERROR</span>
+                        </div>
+                        <div style="margin-bottom: 12px; color: var(--color-error);">⚠️ Sensor calibration issue</div>
+                        <div style="display: flex; gap: 8px; margin-top: 12px;">
+                            <button class="btn btn-error btn-sm">🚨 E-Stop</button>
+                            <button class="btn btn-primary btn-sm">🔧 Fix</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MANAGER DASHBOARD -->
+        <div class="dashboard-view active" id="manager-view">
+            <!-- Main Metrics -->
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">DISRATE</div>
+                    <div class="metric-value">2.3%</div>
+                    <div class="metric-trend trend-down">📉 -0.5% from yesterday</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">THROUGHPUT</div>
+                    <div class="metric-value">342</div>
+                    <div style="font-size: 12px; color: var(--color-text-secondary);">items/h (Target: 300)</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">PERFORMANCE</div>
+                    <div class="metric-value">8.5s</div>
+                    <div style="font-size: 12px; color: var(--color-text-secondary);">Cycle time • 99.2% success</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">VOLUME</div>
+                    <div class="metric-value">2,145</div>
+                    <div style="font-size: 12px; color: var(--color-text-secondary);">Today • 14,230 this week</div>
+                </div>
+            </div>
+
+            <!-- Errors Summary -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">⚠️ Error Statistics</h2>
+                    <button class="btn btn-secondary btn-sm">📊 Export Report</button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Error Type</th>
+                            <th>Count</th>
+                            <th>Percentage</th>
+                            <th>Last Occurred</th>
+                            <th>Resolution</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sensor Calibration</td>
+                            <td>45</td>
+                            <td><span class="status-badge error">28.5%</span></td>
+                            <td>8m ago</td>
+                            <td>Auto-calibration</td>
+                        </tr>
+                        <tr>
+                            <td>Vision Timeout</td>
+                            <td>32</td>
+                            <td><span class="status-badge warning">20.3%</span></td>
+                            <td>15m ago</td>
+                            <td>Restart vision module</td>
+                        </tr>
+                        <tr>
+                            <td>Motion Planning</td>
+                            <td>28</td>
+                            <td><span class="status-badge warning">17.7%</span></td>
+                            <td>22m ago</td>
+                            <td>Check workspace</td>
+                        </tr>
+                        <tr>
+                            <td>Battery Low</td>
+                            <td>38</td>
+                            <td><span class="status-badge info">24.1%</span></td>
+                            <td>1h ago</td>
+                            <td>Recharge robot</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Thread-style Comments -->
+                <div class="comment-section">
+                    <div style="font-weight: 600; margin-bottom: 12px;">💬 Discussion</div>
+                    <div class="comment-item">
+                        <div class="comment-avatar">👤</div>
+                        <div class="comment-content">
+                            <div class="comment-author">Иван Петров</div>
+                            <div class="comment-text">Sensor calibration errors increased today. Need to investigate Robot 3.</div>
+                            <div class="comment-time">2 hours ago</div>
+                        </div>
+                    </div>
+                    <div class="comment-reply">
+                        <div class="comment-item">
+                            <div class="comment-avatar">👨💻</div>
+                            <div class="comment-content">
+                                <div class="comment-author">Tech Support</div>
+                                <div class="comment-text">Scheduled maintenance for Robot 3 tomorrow at 09:00.</div>
+                                <div class="comment-time">1 hour ago</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="add-comment">
+                        <input type="text" placeholder="Add a comment..." />
+                        <button class="btn btn-primary btn-sm">Send</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calendar & Filters -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📅 Period Analytics</h2>
+                    <div style="display: flex; gap: 8px;">
+                        <select class="btn btn-secondary btn-sm" style="padding: 6px 12px;">
+                            <option>Today</option>
+                            <option>This Week</option>
+                            <option>This Month</option>
+                            <option>Custom Range</option>
+                        </select>
+                        <select class="btn btn-secondary btn-sm" style="padding: 6px 12px;">
+                            <option>All Locations</option>
+                            <option>Lobach</option>
+                            <option>SEMAT</option>
+                            <option>Belgrade</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="background: var(--color-bg-1); padding: 24px; border-radius: 8px; text-align: center;">
+                    📊 Period performance charts would be displayed here<br>
+                    <small style="color: var(--color-text-secondary);">Disrate trends • Performance graphs • Volume analysis</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- DEVELOPER DASHBOARD -->
+        <div class="dashboard-view" id="developer-view">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📹 AI Vision Debug</h2>
+                    <span class="status-badge success">Live • 60 FPS</span>
+                </div>
+                <div style="background: var(--color-charcoal-800); aspect-ratio: 16/9; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--color-gray-400); font-size: 18px;">
+                    📹 Live Camera Feed with AI Overlay
+                </div>
+                <div style="margin-top: 16px; display: flex; gap: 12px;">
+                    <button class="btn btn-secondary">📸 Snapshot</button>
+                    <button class="btn btn-secondary">🎥 Record</button>
+                    <button class="btn btn-secondary">⚙️ Parameters</button>
+                </div>
+            </div>
+
+            <!-- Degradation Tests -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">🧪 Degradation Tests</h2>
+                    <button class="btn btn-error btn-sm">Enable Stress Test</button>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                    <div style="padding: 16px; background: var(--color-bg-1); border-radius: 8px;">
+                        <div style="font-size: 12px; color: var(--color-text-secondary);">Network Latency</div>
+                        <div style="font-size: 20px; font-weight: 700; margin-top: 8px;">+50ms</div>
+                        <button class="btn btn-secondary btn-sm" style="margin-top: 8px; width: 100%;">Inject</button>
+                    </div>
+                    <div style="padding: 16px; background: var(--color-bg-1); border-radius: 8px;">
+                        <div style="font-size: 12px; color: var(--color-text-secondary);">Sensor Noise</div>
+                        <div style="font-size: 20px; font-weight: 700; margin-top: 8px;">±10%</div>
+                        <button class="btn btn-secondary btn-sm" style="margin-top: 8px; width: 100%;">Inject</button>
+                    </div>
+                    <div style="padding: 16px; background: var(--color-bg-1); border-radius: 8px;">
+                        <div style="font-size: 12px; color: var(--color-text-secondary);">CPU Overload</div>
+                        <div style="font-size: 20px; font-weight: 700; margin-top: 8px;">90%</div>
+                        <button class="btn btn-secondary btn-sm" style="margin-top: 8px; width: 100%;">Inject</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tester Checklist -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">✅ Tester Requirements</h2>
+                    <span class="status-badge warning">1 Failed</span>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Test</th>
+                            <th>Status</th>
+                            <th>Last Run</th>
+                            <th>Progress</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sensor drift detection</td>
+                            <td><span class="status-badge success">Passed</span></td>
+                            <td>5:00 AM</td>
+                            <td>100%</td>
+                        </tr>
+                        <tr>
+                            <td>Vision model accuracy</td>
+                            <td><span class="status-badge success">Passed</span></td>
+                            <td>4:30 AM</td>
+                            <td>100%</td>
+                        </tr>
+                        <tr>
+                            <td>Gripper force control</td>
+                            <td><span class="status-badge info">Running</span></td>
+                            <td>Now</td>
+                            <td>65%</td>
+                        </tr>
+                        <tr>
+                            <td>Motion planning edge cases</td>
+                            <td><span class="status-badge error">Failed</span></td>
+                            <td>3:00 AM</td>
+                            <td>0%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- BUSINESS DASHBOARD -->
+        <div class="dashboard-view" id="business-view">
+            <div class="card">
+                <div style="text-align: center; padding: 24px;">
+                    <div style="font-size: 48px; font-weight: 700; color: var(--color-success); margin-bottom: 8px;">99.2%</div>
+                    <div style="font-size: 18px; color: var(--color-text-secondary);">System Operating at Peak Performance</div>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">UPTIME</div>
+                    <div class="metric-value">99.8%</div>
+                    <div style="font-size: 12px; color: var(--color-text-secondary);">48h 23m continuous</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">AVG SPEED</div>
+                    <div class="metric-value">8.5s</div>
+                    <div style="font-size: 12px; color: var(--color-text-secondary);">per item</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">COST PER ITEM</div>
+                    <div class="metric-value">$0.12</div>
+                    <div style="font-size: 12px; color: var(--color-text-secondary);">15% reduction</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">TOTAL PROCESSED</div>
+                    <div class="metric-value">58.9K</div>
+                    <div style="font-size: 12px; color: var(--color-text-secondary);">this month</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">🧠 AI Decision Transparency</h2>
+                </div>
+                <div style="background: var(--color-bg-1); padding: 24px; border-radius: 8px;">
+                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">Why Box #2 was selected?</div>
+                    <div style="font-size: 14px; line-height: 1.6; color: var(--color-text-secondary);">
+                        ✓ Highest confidence score (96.8%)<br>
+                        ✓ Optimal position for gripper<br>
+                        ✓ Minimizes travel time<br>
+                        ✓ Within weight handling range (1.2kg)
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADMIN DASHBOARD -->
+        <div class="dashboard-view" id="admin-view">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">👥 User Management</h2>
+                    <button class="btn btn-primary btn-sm">+ Add User</button>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Role</th>
+                            <th>Last Login</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Иван Петров</td>
+                            <td><span class="status-badge info">Manager</span></td>
+                            <td>Just now</td>
+                            <td><span class="status-badge success">Active</span></td>
+                            <td>
+                                <button class="btn btn-secondary btn-sm">Edit</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">🔐 Environment Settings</h2>
+                </div>
+                <div style="display: grid; gap: 16px;">
+                    <div>
+                        <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px;">Active Environment</label>
+                        <select class="btn btn-secondary" style="width: 200px;">
+                            <option selected>PROD (v4.0.0)</option>
+                            <option>STAGING (v4.0.0-rc1)</option>
+                            <option>DEV (v4.0.0-dev)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px;">Safety Limits</label>
+                        <div style="display: flex; gap: 12px;">
+                            <button class="btn btn-secondary">Configure</button>
+                            <button class="btn btn-secondary">Test Limits</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📋 Audit Log</h2>
+                    <button class="btn btn-secondary btn-sm">🔍 Search</button>
+                </div>
+                <div style="max-height: 300px; overflow-y: auto;">
+                    <div style="font-family: var(--font-family-mono); font-size: 12px;">
+                        <div style="padding: 8px; border-bottom: 1px solid var(--color-border);">
+                            <span style="color: var(--color-text-secondary);">[14:35:22]</span>
+                            <span style="color: var(--color-primary);"> [INFO]</span>
+                            User 'ivan@robotics.yandex' logged in from 192.168.1.100
+                        </div>
+                        <div style="padding: 8px; border-bottom: 1px solid var(--color-border);">
+                            <span style="color: var(--color-text-secondary);">[14:30:15]</span>
+                            <span style="color: var(--color-warning);"> [WARN]</span>
+                            Unusual access pattern detected from IP 203.0.113.42
+                        </div>
+                        <div style="padding: 8px; border-bottom: 1px solid var(--color-border);">
+                            <span style="color: var(--color-text-secondary);">[14:25:03]</span>
+                            <span style="color: var(--color-primary);"> [INFO]</span>
+                            Environment switched from STAGING to PROD by 'admin'
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State Management
+        const state = {
+            currentDashboard: 'manager',
+            consoleOpen: false,
+            consoleTab: 'logs',
+            environment: 'PROD'
+        };
+
+        // DOM Elements
+        const consoleToggle = document.getElementById('console-toggle');
+        const codeConsole = document.getElementById('code-console');
+        const mainContainer = document.getElementById('main-container');
+        const dashboardTabs = document.querySelectorAll('.tab-btn');
+        const dashboardViews = document.querySelectorAll('.dashboard-view');
+        const consoleTabs = document.querySelectorAll('.console-tab');
+
+        // Toggle Code Console
+        consoleToggle.addEventListener('click', () => {
+            state.consoleOpen = !state.consoleOpen;
+            codeConsole.classList.toggle('open');
+            mainContainer.classList.toggle('console-open');
+        });
+
+        // Dashboard Tab Switching
+        dashboardTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const view = tab.dataset.view;
+                
+                // Update active tab
+                dashboardTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Update active view
+                dashboardViews.forEach(v => v.classList.remove('active'));
+                document.getElementById(view + '-view').classList.add('active');
+                
+                state.currentDashboard = view;
+            });
+        });
+
+        // Console Tab Switching
+        consoleTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.dataset.tab;
+                
+                consoleTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                state.consoleTab = tabName;
+                
+                // Update console content based on tab
+                const content = document.getElementById('console-content');
+                if (tabName === 'api') {
+                    content.innerHTML = '<div style="color: var(--color-gray-400);">API endpoints monitoring...</div>';
+                } else if (tabName === 'webhooks') {
+                    content.innerHTML = '<div style="color: var(--color-gray-400);">Webhook activity log...</div>';
+                } else if (tabName === 'debug') {
+                    content.innerHTML = '<div style="color: var(--color-gray-400);">Debug information...</div>';
+                } else {
+                    // Reset to logs
+                    content.innerHTML = `
+                        <div class="log-line">
+                            <span class="log-time">[14:35:22]</span>
+                            <span class="log-level-info">[INFO]</span>
+                            <span>System initialized successfully</span>
+                        </div>
+                        <div class="log-line">
+                            <span class="log-time">[14:35:23]</span>
+                            <span class="log-level-info">[INFO]</span>
+                            <span>Camera feed connected - Robot 1</span>
+                        </div>
+                        <div class="log-line">
+                            <span class="log-time">[14:35:24]</span>
+                            <span class="log-level-warning">[WARN]</span>
+                            <span>High temperature detected - Robot 3: 58°C</span>
+                        </div>
+                        <div class="log-line">
+                            <span class="log-time">[14:35:25]</span>
+                            <span class="log-level-error">[ERROR]</span>
+                            <span>Calibration failed - Robot 3</span>
+                        </div>
+                    `;
+                }
+            });
+        });
+
+        // Simulate real-time log updates
+        setInterval(() => {
+            if (state.consoleOpen && state.consoleTab === 'logs') {
+                const content = document.getElementById('console-content');
+                const timestamp = new Date().toTimeString().split(' ')[0];
+                const levels = ['info', 'warning', 'error'];
+                const messages = [
+                    'Task completed successfully',
+                    'Memory usage: 2.4GB / 8GB',
+                    'Network latency spike detected',
+                    'Robot 1 processing batch #42'
+                ];
+                
+                const level = levels[Math.floor(Math.random() * levels.length)];
+                const message = messages[Math.floor(Math.random() * messages.length)];
+                
+                const newLog = document.createElement('div');
+                newLog.className = 'log-line';
+                newLog.innerHTML = `
+                    <span class="log-time">[${timestamp}]</span>
+                    <span class="log-level-${level}">[${level.toUpperCase()}]</span>
+                    <span>${message}</span>
+                `;
+                
+                content.appendChild(newLog);
+                content.scrollTop = content.scrollHeight;
+                
+                // Keep only last 50 logs
+                while (content.children.length > 50) {
+                    content.removeChild(content.firstChild);
+                }
+            }
+        }, 3000);
+
+        // Environment Selector
+        document.getElementById('app-selector').addEventListener('change', (e) => {
+            console.log('App switched to:', e.target.value);
+        });
+
+        // Initialize
+        console.log('Robotics Control Platform v4.0.0 initialized');
+        console.log('Role: Manager | Environment: PROD | User: Иван Петров');
+    </script>
+</body>
+</html>
